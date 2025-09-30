@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,10 +18,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,8 +33,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,28 +45,40 @@ import com.example.myapplication.ui.theme.verdeOscuro
 import com.example.myapplication.ui.theme.violetaOscuro
 
 @Composable
-fun Principal(navLogin:()-> Unit){
-    Encabezado(navLogin)
+fun Principal(correo:String, navLogin:()-> Unit){
+    Encabezado(correo, navLogin)
     CuerpoPrincipal()
 }
 
 
 @Composable
-fun Encabezado(navLogin: () -> Unit) {
-    Row(Modifier.padding(10.dp,20.dp),
-        horizontalArrangement = Arrangement.SpaceBetween) {
+fun Encabezado(correo: String,navLogin: () -> Unit) {
+    Row(Modifier.fillMaxWidth()
+        .background(violetaOscuro)
+        .padding(0.dp, 20.dp, 0.dp, 0.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically) {
         Text("FloresCampo",
             fontSize = 30.sp,
-            color = violetaOscuro,
+            color = Color.White,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.padding(10.dp,20.dp)
         )
+
 
         var expanded by remember { mutableStateOf(false) }
 
-        Box(modifier = Modifier.wrapContentSize()) {
+
+        Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
+            Text(correo,
+                color = Color.White,
+                modifier = Modifier.width(60.dp), // Set a fixed width
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
             IconButton(onClick = { expanded = true }) {
-                Icon(Icons.Default.MoreVert, contentDescription = "More options")
+                Icon(Icons.Default.MoreVert, contentDescription = "More options",
+                    tint = Color.White)
             }
 
             DropdownMenu(
@@ -78,21 +97,29 @@ fun Encabezado(navLogin: () -> Unit) {
         }
     }
 }
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CuerpoPrincipal(){
     Column (
-        modifier = Modifier.fillMaxSize().padding(10.dp,30.dp),
-        horizontalAlignment = Alignment.CenterHorizontally){
+        modifier = Modifier.fillMaxSize().padding(10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center){
+        //estados
         var remitente by remember { mutableStateOf("") }
         var destinatario by remember { mutableStateOf("")}
-        var tipo by remember { mutableStateOf("")}
-        var alergia by remember { mutableStateOf("")}
         var direccion by remember { mutableStateOf("")}
         var precio by remember { mutableStateOf("")}
-        var metodo by remember { mutableStateOf("")}
         var flores by remember { mutableStateOf("")}
         var fecha by remember { mutableStateOf("")}
         var hora by remember { mutableStateOf("")}
+        //select metodo
+        var expandedMetodo by remember { mutableStateOf(false) }
+        val itemsMetodo = listOf("Efectivo", "Tarjeta", "Yape/Plin")
+        var selectedItemMetodo by remember { mutableStateOf(itemsMetodo[0]) }
+        //select tipo
+        var expandedTipo by remember { mutableStateOf(false) }
+        val itemsTipo = listOf("Corona", "Centro de mesa", "Bouquet")
+        var selectedItemTipo by remember { mutableStateOf(itemsTipo[0]) }
 
         Spacer(modifier = Modifier.height(40.dp))
         Text("Nuevo registro",
@@ -100,6 +127,7 @@ fun CuerpoPrincipal(){
             color = rosadoOscuro,
             fontWeight = FontWeight.Bold,
         )
+        Spacer(modifier = Modifier.height(20.dp))
         OutlinedTextField(
             value = remitente,
             onValueChange = {remitente=it},
@@ -114,24 +142,41 @@ fun CuerpoPrincipal(){
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(10.dp))
-        OutlinedTextField(
-            value = tipo,
-            onValueChange = {tipo=it},
-            label = {Text("Tipo de arreglo")},
-            modifier = Modifier.fillMaxWidth()
-        )
+        ExposedDropdownMenuBox(
+            expanded = expandedTipo,
+            onExpandedChange = { expandedTipo = !expandedTipo }
+        ) {
+            OutlinedTextField(
+                value = selectedItemTipo,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Selecciona un tipo") },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTipo) },
+                modifier = Modifier.fillMaxWidth().menuAnchor()
+            )
+
+            ExposedDropdownMenu(
+                expanded = expandedTipo,
+                onDismissRequest = { expandedTipo = false }
+            ) {
+                itemsTipo.forEach { item ->
+                    DropdownMenuItem(
+                        text = { Text(item) },
+                        onClick = {
+                            selectedItemTipo = item
+                            expandedTipo = false
+                        }
+                    )
+                }
+            }
+        }
+
+
         Spacer(modifier = Modifier.height(10.dp))
         OutlinedTextField(
             value = flores,
             onValueChange = {flores=it},
             label = {Text("Preferencia de flores")},
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        OutlinedTextField(
-            value = alergia,
-            onValueChange = {alergia=it},
-            label = {Text("Restricciones alergias")},
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(10.dp))
@@ -165,11 +210,34 @@ fun CuerpoPrincipal(){
                 modifier = Modifier.width(150.dp)
             )
             Spacer(modifier = Modifier.width(10.dp))
-            OutlinedTextField(
-                value = metodo,
-                onValueChange = {metodo=it},
-                label = {Text("Método de pago")}
-            )
+            ExposedDropdownMenuBox(
+                expanded = expandedMetodo,
+                onExpandedChange = { expandedMetodo = !expandedMetodo }
+            ) {
+                OutlinedTextField(
+                    value = selectedItemMetodo,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Selecciona un tipo") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedMetodo) },
+                    modifier = Modifier.fillMaxWidth().menuAnchor()
+                )
+
+                ExposedDropdownMenu(
+                    expanded = expandedMetodo,
+                    onDismissRequest = { expandedMetodo = false }
+                ) {
+                    itemsMetodo.forEach { item ->
+                        DropdownMenuItem(
+                            text = { Text(item) },
+                            onClick = {
+                                selectedItemMetodo = item
+                                expandedMetodo = false
+                            }
+                        )
+                    }
+                }
+            }
         }
         Spacer(modifier = Modifier.height(20.dp))
         Button(
@@ -185,8 +253,3 @@ fun CuerpoPrincipal(){
     }
 }
 
-/*@Preview(showSystemUi = true)
-@Composable
-fun previewPrincipal(){
-    Principal()
-}*/

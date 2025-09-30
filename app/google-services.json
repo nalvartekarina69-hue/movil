@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "136119768439",
+    "project_id": "loginflores-e50f4",
+    "storage_bucket": "loginflores-e50f4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:136119768439:android:9c00f55c529cc71da87d72",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDq46om5Mi8enQ8PVVywg_VWVWHQtc0KqI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
