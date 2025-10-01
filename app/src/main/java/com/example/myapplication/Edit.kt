@@ -1,11 +1,8 @@
 package com.example.myapplication
 
-import android.icu.util.Calendar
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,7 +16,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,14 +27,12 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -46,21 +40,23 @@ import androidx.compose.ui.unit.sp
 import com.example.myapplication.ui.theme.rosadoOscuro
 import com.example.myapplication.ui.theme.verdeOscuro
 import com.example.myapplication.ui.theme.violetaOscuro
-import java.time.LocalDateTime
 
-
-val pedidos= mutableStateListOf<Pedidos>()
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun PrincipalScreen(correo:String, navLogin:()-> Unit, navLista:()-> Unit){
-    Encabezado(correo, navLogin,navLista)
-    CuerpoPrincipal(navLista)
+fun EditScreen(correo: String,
+               pedidos: Pedidos,
+               navLogin: () -> Unit,
+               navPrincipal: () -> Unit,
+               navLista:()-> Unit) {
+    Encabezado3(correo, navLogin, navPrincipal)
+    CuerpoEdit(pedidos,navLista)
+
 }
 
 
-
 @Composable
-fun Encabezado(correo: String, navLogin: () -> Unit, navLista: () -> Unit) {
+fun Encabezado3(correo: String, navLogin: () -> Unit, navPrincipal: () -> Unit) {
+
     Row(Modifier.fillMaxWidth()
         .background(violetaOscuro)
         .padding(0.dp, 20.dp, 0.dp, 0.dp),
@@ -94,8 +90,8 @@ fun Encabezado(correo: String, navLogin: () -> Unit, navLista: () -> Unit) {
                 onDismissRequest = { expanded = false }
             ) {
                 DropdownMenuItem(
-                    text = { Text("Lista") },
-                    onClick = { navLista()}
+                    text = { Text("Registro") },
+                    onClick = { navPrincipal()}
                 )
                 DropdownMenuItem(
                     text = { Text("Salir") },
@@ -105,33 +101,34 @@ fun Encabezado(correo: String, navLogin: () -> Unit, navLista: () -> Unit) {
         }
     }
 }
+
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CuerpoPrincipal(navLista: () -> Unit){
+fun CuerpoEdit(pedido: Pedidos, navLista: () -> Unit) {
     Column (
         modifier = Modifier.fillMaxSize().padding(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center){
         //estados
-        var remitente by remember { mutableStateOf("") }
-        var destinatario by remember { mutableStateOf("")}
-        var direccion by remember { mutableStateOf("")}
-        var precio by remember { mutableStateOf("")}
-        var flores by remember { mutableStateOf("")}
-        var fecha by remember { mutableStateOf("")}
-        var hora by remember { mutableStateOf("")}
+        var remitente by remember { mutableStateOf(pedido.remitente) }
+        var destinatario by remember { mutableStateOf(pedido.destinatario)}
+        var direccion by remember { mutableStateOf(pedido.direccion)}
+        var precio by remember { mutableStateOf(pedido.precio)}
+        var flores by remember { mutableStateOf(pedido.flores)}
+        var fecha by remember { mutableStateOf(pedido.fecha)}
+        var hora by remember { mutableStateOf(pedido.hora)}
         //select metodo
         var expandedMetodo by remember { mutableStateOf(false) }
         val itemsMetodo = listOf("Efectivo", "Tarjeta", "Yape/Plin")
-        var selectedItemMetodo by remember { mutableStateOf(itemsMetodo[0]) }
+        var selectedItemMetodo by remember { mutableStateOf(pedido.metodo) }
         //select tipo
         var expandedTipo by remember { mutableStateOf(false) }
         val itemsTipo = listOf("Corona", "Centro de mesa", "Bouquet")
-        var selectedItemTipo by remember { mutableStateOf(itemsTipo[0]) }
+        var selectedItemTipo by remember { mutableStateOf(pedido.tipo) }
 
         Spacer(modifier = Modifier.height(40.dp))
-        Text("Nuevo registro",
+        Text("Editar pedido",
             fontSize = 30.sp,
             color = rosadoOscuro,
             fontWeight = FontWeight.Bold,
@@ -252,7 +249,7 @@ fun CuerpoPrincipal(navLista: () -> Unit){
         Button(
             onClick = {
 
-                FirebaseRepository.addPedido(Pedidos("",remitente,destinatario,direccion,precio,flores,selectedItemMetodo,selectedItemTipo, fecha,hora))
+                FirebaseRepository.updatePedido(Pedidos(pedido.id, remitente,destinatario,direccion,precio,flores,selectedItemMetodo,selectedItemTipo,fecha,hora))
                 navLista()
 
             },
@@ -261,7 +258,7 @@ fun CuerpoPrincipal(navLista: () -> Unit){
                 containerColor = verdeOscuro
             )
         ) {
-            Text("Guardar",
+            Text("Actualizar",
                 fontSize= 20.sp)
         }
 
